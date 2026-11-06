@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Mateo: a clean, fast search page.">
+    <title>Mateo</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%2326406d'/%3E%3Cpath d='M16 5l9 11-9 11-9-11z' fill='%23bfe3ff'/%3E%3C/svg%3E">
+    <link rel="stylesheet" href="./index.css">
+</head>
+
+<body>
+    <div class="container">
+        <div class="topbar">
+            <h1 class="site-title">Mateo</h1>
+            <button class="theme-toggle" id="theme-toggle" type="button" aria-label="Toggle theme" aria-pressed="false">
+                <span class="theme-toggle-track">
+                    <span class="theme-toggle-thumb"></span>
+                </span>
+                <span class="theme-toggle-text">Night</span>
+            </button>
+        </div>
+
+        <!-- The form still works as a normal Google search even if the JavaScript fails to load. -->
+        <form class="box" id="search-form" role="search" action="https://www.google.com/search" method="get" autocomplete="off">
+            <button class="search-btn" type="submit" aria-label="Search">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4.5 4.5"/></svg>
+            </button>
+
+            <input type="search" id="search-input" name="q" placeholder="Search..."
+                   aria-label="Search" role="combobox" aria-autocomplete="list"
+                   aria-controls="suggestions" aria-expanded="false"
+                   autocomplete="off" spellcheck="false">
+
+            <button class="clear-btn" id="clear-btn" type="button" aria-label="Clear search">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+            </button>
+
+            <ul class="suggestions" id="suggestions" role="listbox" aria-label="Suggestions"></ul>
+        </form>
+
+        <p class="search-status" id="search-status" role="status" aria-live="polite" hidden></p>
+
+        <!-- The quick-access tiles are created by index.js. -->
+        <nav class="shortcuts" id="shortcuts" aria-label="Quick links"></nav>
+
+        <p class="hint">Press <kbd>/</kbd> to start searching</p>
+    </div>
+
+    <script src="./index.js"></script>
+</body>
+</html>

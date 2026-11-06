@@ -1,0 +1,569 @@
+/* =========================================================
+   ICE WEB  -  ai.css
+   Look: a night sky that thaws into frost, with one frosted
+   glass search bar that grows when you hover or click it.
+   ========================================================= */
+
+
+/* ---------- Colours and sizes (change these to restyle the page) ---------- */
+:root {
+    --midnight:  #0b1430;                  /* top of the page */
+    --harbour:   #26406d;                  /* middle of the page */
+    --glacier:   #b4c6de;                  /* bottom of the page */
+    --frost:     #f2f7fd;                  /* main text */
+    --frost-dim: rgba(242, 247, 253, 0.78);
+    --ice:       #bfe3ff;                  /* the one accent colour */
+    --ice-soft:  rgba(191, 227, 255, 0.20);
+
+    --glass:       rgba(255, 255, 255, 0.13);
+    --glass-hover: rgba(255, 255, 255, 0.19);
+    --glass-edge:  rgba(255, 255, 255, 0.28);
+    --panel:       #101d3a;
+
+    --bar-closed: 320px;    /* width of the search bar when you are not using it */
+    --bar-open:   100%;     /* width when you hover or click it */
+    --speed:      0.5s;     /* how fast the bar grows */
+}
+
+body[data-theme="day"] {
+    --midnight:  #dff4ff;
+    --harbour:   #a8d7ff;
+    --glacier:   #f5fbff;
+    --frost:     #17324d;
+    --frost-dim: rgba(23, 50, 77, 0.74);
+    --ice:       #2d7ff9;
+    --ice-soft:  rgba(45, 127, 249, 0.18);
+
+    --glass:       rgba(255, 255, 255, 0.58);
+    --glass-hover: rgba(255, 255, 255, 0.72);
+    --glass-edge:  rgba(82, 127, 175, 0.35);
+    --panel:       #edf7ff;
+}
+
+
+/* ---------- Page ---------- */
+*{
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html{
+    color-scheme: dark;
+}
+
+body{
+    min-height: 100vh;
+    min-height: 100dvh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 24px 16px;
+
+    background-color: #1e2229;   /* your original colour, shown only if the gradient can't load */
+    background-image:
+        /* a very fine grain so the gradient feels like frosted glass, not a flat screen */
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 .14 0 0 0 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"),
+        linear-gradient(180deg, var(--midnight) 0%, var(--harbour) 52%, var(--glacier) 100%);
+
+    font-family: "Segoe UI", system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif;
+    color: var(--frost);
+}
+
+.container{
+    width: 100%;
+    max-width: 560px;
+    text-align: center;
+    color: var(--frost);
+    transform: translateY(-4vh);     /* sits a little above the exact middle, which looks better */
+}
+
+.topbar{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    margin-bottom: 30px;
+}
+
+
+/* ---------- Title ---------- */
+.site-title{
+    margin: 0;
+    font-family: "Iowan Old Style", "Baskerville", "Palatino Linotype", Palatino, Georgia, serif;
+    font-size: clamp(3rem, 10vw, 4.4rem);
+    font-weight: 600;
+    letter-spacing: -0.035em;
+    color: var(--frost);
+    text-shadow: 0 2px 22px rgba(191, 227, 255, 0.3);
+    user-select: none;
+    animation: thaw 1.2s ease-out backwards;
+}
+
+.theme-toggle{
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 10px 8px 8px;
+    border: 1px solid var(--glass-edge);
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.08);
+    color: var(--frost);
+    font: inherit;
+    font-size: 0.82rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.2s ease, background 0.2s ease, border-color 0.2s ease;
+}
+
+.theme-toggle:hover{
+    transform: translateY(-1px);
+    background: rgba(255, 255, 255, 0.12);
+}
+
+.theme-toggle-track{
+    position: relative;
+    display: inline-block;
+    width: 38px;
+    height: 22px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.18);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+}
+
+.theme-toggle-thumb{
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: linear-gradient(180deg, #fff3b8, #ffb86c);
+    box-shadow: 0 1px 8px rgba(0, 0, 0, 0.25);
+    transition: transform 0.2s ease;
+}
+
+body[data-theme="day"] .theme-toggle-thumb{
+    transform: translateX(16px);
+    background: linear-gradient(180deg, #fffdf8, #a6d7ff);
+}
+
+.theme-toggle-text{
+    min-width: 42px;
+    text-align: left;
+}
+
+/* ---------- Search box ---------- */
+.box{
+    position: relative;
+    z-index: 5;                      /* keeps the dropdown above the engine buttons */
+    display: flex;
+    align-items: center;
+    width: var(--bar-closed);
+    max-width: 100%;
+    height: 52px;
+    margin: 0 auto;
+    padding: 0 10px 0 8px;
+    cursor: text;
+    background: var(--glass);
+    border: 1px solid var(--glass-edge);
+    border-radius: 30px;
+    box-shadow:
+        0 10px 25px rgba(0, 0, 0, 0.45),
+        inset 0 1px 0 rgba(255, 255, 255, 0.30);       /* the bright edge of the "glass" */
+    -webkit-backdrop-filter: blur(14px);
+    backdrop-filter: blur(14px);
+    transition:
+        width var(--speed) cubic-bezier(0.2, 0.8, 0.2, 1),
+        background 0.3s,
+        border-color 0.3s,
+        box-shadow 0.3s;
+    animation: thaw 1.1s 0.25s ease-out backwards;
+}
+
+/* Grow when you hover over it or click into it */
+.box:hover,
+.box:focus-within{
+    width: var(--bar-open);
+    background: var(--glass-hover);
+}
+
+/* Stay wide while there are words in it */
+.box:has(input:not(:placeholder-shown)){
+    width: var(--bar-open);
+}
+
+.box:focus-within{
+    border-color: var(--ice);
+    box-shadow:
+        0 10px 25px rgba(0, 0, 0, 0.45),
+        inset 0 1px 0 rgba(255, 255, 255, 0.30),
+        0 0 0 4px var(--ice-soft);
+}
+
+input[type="search"]{
+    color: white;
+}
+
+.box input{
+    flex: 1;
+    min-width: 0;
+    height: 100%;
+    padding: 0 10px;
+    outline: none;
+    border: none;
+    background: transparent;
+    font: inherit;
+    font-size: 1.02rem;
+    font-weight: 500;
+    color: white;
+    -webkit-appearance: none;
+    appearance: none;
+}
+
+.box input::placeholder{
+    color: rgba(242, 247, 253, 0.70);
+    font-weight: 400;
+}
+
+/* Hide the browser's own little "x" - we have our own clear button */
+.box input::-webkit-search-cancel-button,
+.box input::-webkit-search-decoration{
+    -webkit-appearance: none;
+    appearance: none;
+    display: none;
+}
+
+
+/* ---------- Search and clear buttons ---------- */
+.search-btn,
+.clear-btn{
+    display: grid;
+    place-items: center;
+    flex: none;
+    border: 0;
+    border-radius: 50%;
+    background: transparent;
+    cursor: pointer;
+    transition: color 0.2s, background 0.2s, opacity 0.2s;
+}
+
+.search-btn svg,
+.clear-btn svg,
+.suggestions svg{
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.search-btn{
+    width: 36px;
+    height: 36px;
+    color: var(--ice);
+}
+
+.search-btn svg{
+    width: 20px;
+    height: 20px;
+}
+
+.search-btn:hover{
+    background: var(--ice-soft);
+    color: white;
+}
+
+.clear-btn{
+    width: 28px;
+    height: 28px;
+    color: var(--frost-dim);
+    opacity: 0;
+    pointer-events: none;
+}
+
+.clear-btn svg{
+    width: 14px;
+    height: 14px;
+}
+
+/* The clear button only appears when there is something to clear */
+.box input:not(:placeholder-shown) ~ .clear-btn{
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.clear-btn:hover{
+    background: var(--ice-soft);
+    color: white;
+}
+
+
+/* ---------- Suggestions dropdown ---------- */
+.suggestions{
+    position: absolute;
+    top: calc(100% + 10px);
+    left: 0;
+    right: 0;
+    z-index: 10;
+    display: none;
+    max-height: 340px;
+    overflow-y: auto;
+    padding: 8px;
+    list-style: none;
+    text-align: left;
+    background: var(--panel);
+    border: 1px solid var(--glass-edge);
+    border-radius: 22px;
+    box-shadow: 0 18px 40px rgba(0, 0, 0, 0.5);
+}
+
+.suggestions.show{
+    display: block;
+    animation: drop 0.18s ease-out;
+}
+
+.suggestions li{
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 12px;
+    border-radius: 12px;
+    font-size: 0.98rem;
+    color: var(--frost);
+    cursor: pointer;
+}
+
+.suggestions li.active{
+    background: var(--ice-soft);
+}
+
+.suggestions li svg{
+    flex: none;
+    width: 16px;
+    height: 16px;
+    color: var(--frost-dim);
+}
+
+.suggestions .label{
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* The web address shown on the right of a site row (youtube.com) */
+.suggestions .domain{
+    flex: none;
+    margin-left: auto;
+    padding-left: 12px;
+    font-size: 0.8rem;
+    color: var(--frost-dim);
+}
+
+/* The "Recent searches  Clear" row */
+.suggestions li.heading{
+    justify-content: space-between;
+    padding: 6px 12px 8px;
+    font-size: 0.82rem;
+    color: var(--frost-dim);
+    cursor: default;
+}
+
+.clear-history{
+    border: 0;
+    background: transparent;
+    font: inherit;
+    color: var(--ice);
+    cursor: pointer;
+}
+
+.clear-history:hover{
+    text-decoration: underline;
+}
+
+
+.search-status{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    max-width: 440px;
+    margin: 24px auto 0;
+    padding: 14px 18px;
+    border: 1px solid var(--glass-edge);
+    border-radius: 18px;
+    background: var(--glass);
+    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.20);
+    color: var(--frost-dim);
+    font-size: 0.9rem;
+    line-height: 1.5;
+    text-align: center;
+    -webkit-backdrop-filter: blur(14px);
+    backdrop-filter: blur(14px);
+    animation: drop 0.2s ease-out;
+}
+
+.search-status[hidden]{
+    display: none;
+}
+
+.search-status:not([hidden])::before{
+    width: 14px;
+    height: 14px;
+    flex: none;
+    border: 2px solid var(--ice-soft);
+    border-top-color: var(--ice);
+    border-radius: 50%;
+    content: "";
+    animation: search-spin 0.8s linear infinite;
+}
+
+@keyframes search-spin{
+    to{ transform: rotate(360deg); }
+}
+
+/* ---------- Quick-access tiles (YouTube, Gmail, WhatsApp...) ---------- */
+.shortcuts{
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 22px 8px;
+    margin-top: 38px;
+    animation: thaw 1.1s 0.55s ease-out backwards;
+}
+
+.shortcut{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 9px;
+    min-width: 0;
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: var(--frost-dim);
+    text-decoration: none;
+    transition: color 0.2s;
+}
+
+/* Light tiles, so every logo is easy to see whatever its colour */
+.tile{
+    display: grid;
+    place-items: center;
+    width: 52px;
+    height: 52px;
+    border-radius: 16px;
+    background: rgba(242, 247, 253, 0.92);
+    box-shadow:
+        0 6px 16px rgba(0, 0, 0, 0.30),
+        inset 0 1px 0 rgba(255, 255, 255, 0.90);
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.tile img{
+    display: block;
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
+}
+
+.tile-letter{
+    font-family: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
+    font-size: 1.35rem;
+    font-weight: 700;
+    color: var(--harbour);
+}
+
+/* Once the real logo has loaded, the plain letter is hidden */
+.tile.has-icon .tile-letter{
+    display: none;
+}
+
+.shortcut-name{
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.shortcut:hover{
+    color: white;
+}
+
+.shortcut:hover .tile{
+    transform: translateY(-3px);
+    box-shadow:
+        0 10px 20px rgba(0, 0, 0, 0.35),
+        inset 0 1px 0 rgba(255, 255, 255, 0.90);
+}
+
+.shortcut:focus-visible{
+    outline: 2px solid var(--ice);
+    outline-offset: 4px;
+    border-radius: 14px;
+}
+
+
+/* ---------- Small hint ---------- */
+.hint{
+    margin-top: 28px;
+    font-size: 0.8rem;
+    color: rgba(242, 247, 253, 0.58);
+    animation: thaw 1.1s 0.6s ease-out backwards;
+}
+
+@media (max-width: 540px){
+    .topbar{
+        flex-direction: column;
+        gap: 10px;
+        margin-bottom: 20px;
+    }
+
+    .site-title{
+        letter-spacing: -0.025em;
+    }
+}
+
+kbd{
+    padding: 1px 7px;
+    border: 1px solid rgba(255, 255, 255, 0.30);
+    border-radius: 6px;
+    background: rgba(255, 255, 255, 0.08);
+    font: inherit;
+    color: var(--frost);
+}
+
+/* Phones and tablets have no "/" key, so hide the hint there */
+@media (hover: none){
+    .hint{ display: none; }
+}
+
+
+/* ---------- Keyboard focus (so Tab key users can see where they are) ---------- */
+.search-btn:focus-visible,
+.clear-btn:focus-visible,
+.theme-toggle:focus-visible,
+.clear-history:focus-visible{
+    outline: 2px solid var(--ice);
+    outline-offset: 2px;
+}
+
+
+/* ---------- Animations ---------- */
+/* The page "thaws" into view, like frost clearing off a window */
+@keyframes thaw{
+    from{ opacity: 0; filter: blur(10px); }
+    to  { opacity: 1; filter: blur(0); }
+}
+
+@keyframes drop{
+    from{ opacity: 0; transform: translateY(-6px); }
+    to  { opacity: 1; transform: translateY(0); }
+}
+
+/* People who switch off animations in their system settings get none */
+@media (prefers-reduced-motion: reduce){
+    *, *::before, *::after{
+        animation: none !important;
+        transition: none !important;
+    }
+}
