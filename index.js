@@ -55,7 +55,7 @@ const input      = document.getElementById("search-input");
 const clearBtn   = document.getElementById("clear-btn");
 const list       = document.getElementById("suggestions");
 const shortcutsBox = document.getElementById("shortcuts");
-const themeToggle = document.getElementById("theme-toggle");
+const themeSelect = document.getElementById("theme-select");
 const searchStatus = document.getElementById("search-status");
 
 
@@ -103,28 +103,33 @@ function loadHistory() {
                 .slice(0, MAX_HISTORY);
 }
 
-function applyTheme(themeName) {
-    const isDay = themeName === "day";
-    document.body.dataset.theme = isDay ? "day" : "night";
+const systemTheme = window.matchMedia("(prefers-color-scheme: light)");
 
-    if (themeToggle) {
-        const text = themeToggle.querySelector(".theme-toggle-text");
-        themeToggle.setAttribute("aria-pressed", String(isDay));
-        themeToggle.setAttribute("aria-label", isDay ? "Switch to night mode" : "Switch to day mode");
-        if (text) text.textContent = isDay ? "Day" : "Night";
-    }
+function applyTheme(themeName) {
+    const preference = themeName === "day" || themeName === "night" ? themeName : "system";
+    const resolvedTheme = preference === "system"
+        ? (systemTheme.matches ? "day" : "night")
+        : preference;
+
+    document.body.dataset.theme = preference;
+    document.body.dataset.resolvedTheme = resolvedTheme;
+    document.documentElement.style.colorScheme = resolvedTheme === "day" ? "light" : "dark";
+    themeSelect.value = preference;
 }
 
 function loadTheme() {
-    const saved = load(KEY_THEME, "night");
-    return saved === "day" ? "day" : "night";
+    const saved = load(KEY_THEME, "system");
+    return saved === "day" || saved === "night" || saved === "system" ? saved : "system";
 }
 
-function toggleTheme() {
-    const nextTheme = document.body.dataset.theme === "day" ? "night" : "day";
-    save(KEY_THEME, nextTheme);
-    applyTheme(nextTheme);
-}
+themeSelect.addEventListener("change", function () {
+    save(KEY_THEME, themeSelect.value);
+    applyTheme(themeSelect.value);
+});
+
+systemTheme.addEventListener("change", function () {
+    if (document.body.dataset.theme === "system") applyTheme("system");
+});
 
 // ---------------------------------------------------------
 //  5b. PLATFORM SHORTCUTS (YouTube, Gmail, WhatsApp...)
@@ -574,7 +579,4 @@ document.addEventListener("keydown", function (event) {
 //  12. START UP
 // ---------------------------------------------------------
 applyTheme(loadTheme());
-if (themeToggle) {
-    themeToggle.addEventListener("click", toggleTheme);
-}
 renderShortcuts();

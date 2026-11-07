@@ -13,12 +13,17 @@
     <div class="container">
         <div class="topbar">
             <h1 class="site-title">Mateo</h1>
-            <button class="theme-toggle" id="theme-toggle" type="button" aria-label="Toggle theme" aria-pressed="false">
-                <span class="theme-toggle-track">
-                    <span class="theme-toggle-thumb"></span>
-                </span>
-                <span class="theme-toggle-text">Night</span>
-            </button>
+            <label class="theme-control" title="Color theme">
+                <svg viewBox="0 0 24 24" aria-hidden=" true">
+                    <circle cx="12" cy="12" r="3.5"/>
+                    <path d="M12 2v2m0 16v2M4.93 4.93l1.42 1.42m11.3 11.3 1.42 1.42M2 12h2m16 0h2M4.93 19.07l1.42-1.42m11.3-11.3 1.42-1.42"/>
+                </svg>
+                <select id="theme-select" aria-label="Color theme">
+                    <option value="system">System</option>
+                    <option value="day">Light</option>
+                    <option value="night">Dark</option>
+                </select>
+            </label>
         </div>
 
         <!-- The form still works as a normal Google search even if the JavaScript fails to load. -->

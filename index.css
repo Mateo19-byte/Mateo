@@ -25,7 +25,7 @@
     --speed:      0.5s;     /* how fast the bar grows */
 }
 
-body[data-theme="day"] {
+body[data-resolved-theme="day"] {
     --midnight:  #dff4ff;
     --harbour:   #a8d7ff;
     --glacier:   #f5fbff;
@@ -49,7 +49,7 @@ body[data-theme="day"] {
 }
 
 html{
-    color-scheme: dark;
+    color-scheme: light dark;
 }
 
 body{
@@ -79,10 +79,10 @@ body{
 }
 
 .topbar{
+    position: relative;
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 14px;
     margin-bottom: 30px;
 }
 
@@ -100,57 +100,55 @@ body{
     animation: thaw 1.2s ease-out backwards;
 }
 
-.theme-toggle{
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    padding: 8px 10px 8px 8px;
-    border: 1px solid var(--glass-edge);
-    border-radius: 999px;
-    background: rgba(255, 255, 255, 0.08);
-    color: var(--frost);
-    font: inherit;
-    font-size: 0.82rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: transform 0.2s ease, background 0.2s ease, border-color 0.2s ease;
-}
-
-.theme-toggle:hover{
-    transform: translateY(-1px);
-    background: rgba(255, 255, 255, 0.12);
-}
-
-.theme-toggle-track{
-    position: relative;
-    display: inline-block;
-    width: 38px;
-    height: 22px;
-    border-radius: 999px;
-    background: rgba(255, 255, 255, 0.18);
-    border: 1px solid rgba(255, 255, 255, 0.18);
-}
-
-.theme-toggle-thumb{
+.theme-control{
     position: absolute;
-    top: 2px;
-    left: 2px;
-    width: 14px;
-    height: 14px;
-    border-radius: 50%;
-    background: linear-gradient(180deg, #fff3b8, #ffb86c);
-    box-shadow: 0 1px 8px rgba(0, 0, 0, 0.25);
-    transition: transform 0.2s ease;
+    top: 50%;
+    right: 0;
+    display: grid;
+    place-items: center;
+    width: 40px;
+    height: 40px;
+    border: 1px solid var(--glass-edge);
+    border-radius: 13px;
+    background: rgba(255, 255, 255, 0.07);
+    color: var(--frost-dim);
+    cursor: pointer;
+    transform: translateY(-50%);
+    transition: background 0.2s, border-color 0.2s, color 0.2s;
 }
 
-body[data-theme="day"] .theme-toggle-thumb{
-    transform: translateX(16px);
-    background: linear-gradient(180deg, #fffdf8, #a6d7ff);
+.theme-control:hover{
+    border-color: var(--ice);
+    background: var(--glass-hover);
+    color: var(--frost);
 }
 
-.theme-toggle-text{
-    min-width: 42px;
-    text-align: left;
+.theme-control svg{
+    width: 19px;
+    height: 19px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.6;
+    stroke-linecap: round;
+}
+
+.theme-control select{
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    cursor: pointer;
+}
+
+.theme-control:focus-within{
+    outline: 2px solid var(--ice);
+    outline-offset: 2px;
+}
+
+.theme-control option{
+    background: var(--panel);
+    color: var(--frost);
 }
 
 /* ---------- Search box ---------- */
@@ -202,7 +200,7 @@ body[data-theme="day"] .theme-toggle-thumb{
 }
 
 input[type="search"]{
-    color: white;
+    color: var(--frost);
 }
 
 .box input{
@@ -216,13 +214,13 @@ input[type="search"]{
     font: inherit;
     font-size: 1.02rem;
     font-weight: 500;
-    color: white;
+    color: var(--frost);
     -webkit-appearance: none;
     appearance: none;
 }
 
 .box input::placeholder{
-    color: rgba(242, 247, 253, 0.70);
+    color: var(--frost-dim);
     font-weight: 400;
 }
 
@@ -271,7 +269,7 @@ input[type="search"]{
 
 .search-btn:hover{
     background: var(--ice-soft);
-    color: white;
+    color: var(--frost);
 }
 
 .clear-btn{
@@ -295,7 +293,7 @@ input[type="search"]{
 
 .clear-btn:hover{
     background: var(--ice-soft);
-    color: white;
+    color: var(--frost);
 }
 
 
@@ -513,8 +511,6 @@ input[type="search"]{
 
 @media (max-width: 540px){
     .topbar{
-        flex-direction: column;
-        gap: 10px;
         margin-bottom: 20px;
     }
 
@@ -541,7 +537,6 @@ kbd{
 /* ---------- Keyboard focus (so Tab key users can see where they are) ---------- */
 .search-btn:focus-visible,
 .clear-btn:focus-visible,
-.theme-toggle:focus-visible,
 .clear-history:focus-visible{
     outline: 2px solid var(--ice);
     outline-offset: 2px;
