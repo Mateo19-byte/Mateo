@@ -26,7 +26,6 @@
             </label>
         </div>
 
-        <!-- The form still works as a normal Google search even if the JavaScript fails to load. -->
         <form class="box" id="search-form" role="search" action="https://www.google.com/search" method="get" autocomplete="off">
             <button class="search-btn" type="submit" aria-label="Search">
                 <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4.5 4.5"/></svg>
@@ -45,13 +44,75 @@
         </form>
 
         <p class="search-status" id="search-status" role="status" aria-live="polite" hidden></p>
-
-        <!-- The quick-access tiles are created by index.js. -->
         <nav class="shortcuts" id="shortcuts" aria-label="Quick links"></nav>
 
         <p class="hint">Press <kbd>/</kbd> to start searching</p>
+
+        <section class="mateo-assistant" aria-labelledby="mateo-assistant-title">
+            <button id="mateo-core" class="mateo-core" type="button"
+                    data-mateo-state="off"
+                    aria-label="Turn Mateo voice assistant on or off"></button>
+            <div class="mateo-assistant-copy">
+                <h2 id="mateo-assistant-title">Talk to Mateo</h2>
+                <p id="mateo-status" aria-live="polite">Offline. Tap the core to start.</p>
+                <p id="mateo-heard" aria-live="polite"></p>
+            </div>
+        </section>
+
+        <section id="mateo-answer" class="mateo-answer" hidden aria-live="polite"></section>
     </div>
 
+    <script>
+        window.MATEO_VOICE = {
+            searchInput: "#search-input",
+            trigger: "#mateo-core",
+            statusOnly: true,
+            answerEndpoint: "/api/answer"
+        };
+    </script>
     <script src="./index.js"></script>
+    <script src="./mateo-voice.js" defer></script>
+    <script>
+        const mateoStatus = document.getElementById("mateo-status");
+        const mateoHeard = document.getElementById("mateo-heard");
+        const mateoAnswer = document.getElementById("mateo-answer");
+
+        function renderMateoAnswer(query, result) {
+            mateoAnswer.hidden = false;
+            mateoAnswer.replaceChildren();
+
+            const heading = document.createElement("h2");
+            heading.textContent = query;
+            const text = document.createElement("p");
+            text.textContent = result.text || result.answer || "";
+            mateoAnswer.append(heading, text);
+
+            if (result.url) {
+                const source = document.createElement("a");
+                source.href = result.url;
+                source.target = "_blank";
+                source.rel = "noopener";
+                source.textContent = "Read the source";
+                mateoAnswer.append(source);
+            }
+        }
+
+        document.addEventListener("mateo:state", function (event) {
+            mateoStatus.textContent = event.detail.label;
+            if (event.detail.state === "sleeping") mateoHeard.textContent = "";
+        });
+        document.addEventListener("mateo:notice", function (event) {
+            mateoStatus.textContent = event.detail;
+        });
+        document.addEventListener("mateo:heard", function (event) {
+            mateoHeard.textContent = event.detail ? "“" + event.detail + "”" : "";
+        });
+        document.addEventListener("mateo:query", function (event) {
+            mateoHeard.textContent = "“" + event.detail.query + "”";
+        });
+        document.addEventListener("mateo:answer", function (event) {
+            renderMateoAnswer(event.detail.query, event.detail);
+        });
+    </script>
 </body>
 </html>

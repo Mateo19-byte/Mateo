@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mateo</title>
+<style>
+  :root{color-scheme:dark;--bg:#070b12;--fg:#e6f4fa;--mute:#8fa6b3;--line:#1f3442;--field:#0b121b;--acc:#50e1ff}
+  [data-theme=light]{color-scheme:light;--bg:#f2f6f9;--fg:#0b1620;--mute:#566b78;--line:#cbd9e2;--field:#fff;--acc:#007ba8}
+  *{box-sizing:border-box}
+  body{margin:0;min-height:100svh;background:var(--bg);color:var(--fg);font:16px/1.6 system-ui,-apple-system,"Segoe UI",sans-serif}
+  header{display:flex;justify-content:flex-end;padding:max(16px,env(safe-area-inset-top)) 20px 0}
+  main{width:min(660px,92vw);margin:9vh auto 120px}
+  h1{margin:0 0 20px;font-size:clamp(2.4rem,8vw,3.6rem);font-weight:600;letter-spacing:.01em}
+  button{font:inherit;color:inherit}
+  button:focus-visible,input:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+  .icon{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+
+  #theme{width:42px;height:42px;display:grid;place-items:center;border-radius:50%;border:1px solid var(--line);background:transparent;cursor:pointer}
+  [data-theme=dark] .moon,[data-theme=light] .sun{display:none}
+
+  .bar{padding:6px 20px;border:1px solid var(--line);border-radius:999px;background:var(--field)}
+  .bar:focus-within{border-color:var(--acc)}
+  .bar input{width:100%;border:0;background:transparent;color:inherit;font:inherit;padding:10px 0}
+  .bar input:focus-visible{outline:0}
+
+  /* Mateo's dedicated spot */
+  .mateo{display:grid;grid-template-columns:auto 1fr;gap:22px;align-items:center;margin-top:40px;padding-top:28px;border-top:1px solid var(--line)}
+  .mateo h2{margin:0;font-size:1.15rem;font-weight:600}
+  .mateo p{margin:2px 0 0;color:var(--mute)}
+  #m-you{color:var(--fg)}
+  .core{width:92px;height:92px;padding:0;border-radius:50%;cursor:pointer;border:1.5px solid color-mix(in srgb,var(--acc) 70%,transparent);
+    background:radial-gradient(circle at 35% 30%,#fff 0 6%,var(--acc) 7% 20%,color-mix(in srgb,var(--acc) 30%,var(--bg)) 21% 55%,var(--bg) 56%);
+    box-shadow:0 0 24px color-mix(in srgb,var(--acc) 40%,transparent)}
+  .core[data-mateo-state=off]{filter:grayscale(1) brightness(.75);box-shadow:none}
+  .core[data-mateo-state=sleeping]{animation:breathe 4s ease-in-out infinite}
+  .core[data-mateo-state=awake]{border-color:#fff;box-shadow:0 0 0 8px color-mix(in srgb,var(--acc) 25%,transparent),0 0 36px var(--acc);animation:breathe 1s ease-in-out infinite}
+  .core[data-mateo-state=thinking]{border-color:#9b8cff;box-shadow:0 0 30px rgba(155,140,255,.65);animation:breathe 1.2s ease-in-out infinite}
+  .core[data-mateo-state=speaking]{border-color:#2fd6a3;animation:ripple 1.3s ease-out infinite}
+  @keyframes breathe{50%{transform:scale(1.05)}}
+  @keyframes ripple{0%{box-shadow:0 0 0 0 rgba(47,214,163,.5)}100%{box-shadow:0 0 0 22px rgba(47,214,163,0)}}
+
+  #out{margin-top:28px;padding-left:16px;border-left:3px solid var(--acc)}
+  #out h2{margin:0 0 6px;font-size:1.1rem}
+  #out p{margin:0;max-width:62ch}
+  #out a{display:inline-block;margin-top:8px;color:var(--acc)}
+  @media (prefers-reduced-motion:reduce){.core{animation:none!important}}
+  @media (max-width:420px){.mateo{grid-template-columns:1fr;justify-items:start}}
+</style>
+</head>
+<body>
+<header>
+  <button id="theme" type="button" aria-label="Switch between light and dark theme">
+    <svg class="icon sun" viewBox="0 0 24 24" aria-hidden="true">
+      <circle cx="12" cy="12" r="4"/>
+      <path d="M12 2v2m0 16v2M4.93 4.93l1.42 1.42m11.3 11.3 1.42 1.42M2 12h2m16 0h2M4.93 19.07l1.42-1.42m11.3-11.3 1.42-1.42"/>
+    </svg>
+    <svg class="icon moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
+  </button>
+</header>
+
+<main>
+  <h1>Mateo</h1>
+  <form id="search" class="bar" role="search">
+    <input id="q" type="search" placeholder="Search anything" aria-label="Search" autocomplete="off">
+  </form>
+
+  <section class="mateo" aria-labelledby="mateo-title">
+    <button id="core" class="core mateo-trigger" type="button" data-mateo-state="off" aria-label="Turn Mateo voice on or off"></button>
+    <div>
+      <h2 id="mateo-title">Talk to Mateo</h2>
+      <p id="m-status" aria-live="polite">Offline. Tap the core to start.</p>
+      <p id="m-you"></p>
+    </div>
+  </section>
+
+  <section id="out" hidden aria-live="polite"></section>
+</main>
+
+<script>
+  // Voice settings: must come before mateo-voice.js
+  window.MATEO_VOICE = { searchInput: "#q", trigger: ".mateo-trigger", statusOnly: true, answerEndpoint: "/api/answer" };
+
+  const root = document.documentElement, out = document.getElementById("out");
+  const q = document.getElementById("q"), mStatus = document.getElementById("m-status"), mYou = document.getElementById("m-you");
+
+  // Theme toggle (remembers the choice)
+  let saved = null; try { saved = localStorage.getItem("mateo-theme"); } catch (_) {}
+  root.dataset.theme = saved || (matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark");
+  document.getElementById("theme").addEventListener("click", () => {
+    const t = root.dataset.theme === "dark" ? "light" : "dark";
+    root.dataset.theme = t;
+    try { localStorage.setItem("mateo-theme", t); } catch (_) {}
+  });
+
+  // Show an answer on the page (typed or spoken)
+  function render(query, res) {
+    out.hidden = false; out.replaceChildren();
+    const h = document.createElement("h2"), p = document.createElement("p");
+    h.textContent = query; p.textContent = res.text || res.answer || "";
+    out.append(h, p);
+    if (res.url) { const a = document.createElement("a"); a.href = res.url; a.target = "_blank"; a.rel = "noopener"; a.textContent = "Read the source"; out.append(a); }
+  }
+
+  // Typed search: answer on screen, no speech
+  document.getElementById("search").addEventListener("submit", async e => {
+    e.preventDefault();
+    const query = q.value.trim(); if (!query) return;
+    out.hidden = false; out.textContent = "Searching…";
+    try { render(query, await MateoVoice.answer(query)); }
+    catch (_) { render(query, { text: "I couldn’t reach my sources just now. Please try again." }); }
+  });
+
+  // Mateo's section follows the voice assistant
+  document.addEventListener("mateo:state", e => { mStatus.textContent = e.detail.label; if (e.detail.state === "sleeping") mYou.textContent = ""; });
+  document.addEventListener("mateo:notice", e => { mStatus.textContent = e.detail; });
+  document.addEventListener("mateo:heard", e => { mYou.textContent = e.detail ? "“" + e.detail + "”" : ""; });
+  document.addEventListener("mateo:query", e => { mYou.textContent = "“" + e.detail.query + "”"; });
+  document.addEventListener("mateo:answer", e => render(e.detail.query, e.detail));
+</script>
+<script src="mateo-voice.js" defer></script>
+</body>
+</html>

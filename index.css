@@ -1,5 +1,5 @@
 /* =========================================================
-   ICE WEB  -  ai.css
+   Mateo  -  index.css
    Look: a night sky that thaws into frost, with one frosted
    glass search bar that grows when you hover or click it.
    ========================================================= */
@@ -526,6 +526,108 @@ kbd{
     background: rgba(255, 255, 255, 0.08);
     font: inherit;
     color: var(--frost);
+}
+
+.mateo-assistant{
+    display: grid;
+    grid-template-columns: auto 1fr;
+    align-items: center;
+    gap: 16px;
+    max-width: 440px;
+    margin: 24px auto 0;
+    padding: 14px 16px;
+    text-align: left;
+    border: 1px solid var(--glass-edge);
+    border-radius: 18px;
+    background: var(--glass);
+    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.20);
+    -webkit-backdrop-filter: blur(14px);
+    backdrop-filter: blur(14px);
+}
+
+.mateo-core{
+    width: 58px;
+    height: 58px;
+    flex: none;
+    border: 1.5px solid var(--ice);
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 30%, #fff 0 6%, var(--ice) 7% 22%, var(--harbour) 23% 56%, var(--midnight) 57%);
+    box-shadow: 0 0 18px var(--ice-soft), 0 6px 16px rgba(0, 0, 0, 0.30);
+    cursor: pointer;
+}
+
+.mateo-core[data-mateo-state="off"]{
+    filter: grayscale(1) brightness(.75);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.30);
+}
+
+.mateo-core[data-mateo-state="awake"]{
+    box-shadow: 0 0 0 6px var(--ice-soft), 0 0 30px var(--ice);
+    animation: mateo-breathe 1s ease-in-out infinite;
+}
+
+.mateo-core[data-mateo-state="thinking"]{
+    border-color: #9b8cff;
+    box-shadow: 0 0 24px rgba(155, 140, 255, .65);
+    animation: mateo-breathe 1.2s ease-in-out infinite;
+}
+
+.mateo-core[data-mateo-state="speaking"]{
+    border-color: #7fffd4;
+    box-shadow: 0 0 26px rgba(127, 255, 212, .55);
+}
+
+.mateo-core:focus-visible{
+    outline: 2px solid var(--ice);
+    outline-offset: 4px;
+}
+
+.mateo-assistant-copy h2{
+    font-size: 1rem;
+    margin: 0 0 2px;
+}
+
+.mateo-assistant-copy p{
+    margin: 0;
+    color: var(--frost-dim);
+    font-size: .82rem;
+}
+
+#mateo-heard{
+    min-height: 1.2em;
+}
+
+.mateo-answer{
+    max-width: 440px;
+    margin: 12px auto 0;
+    padding: 14px 16px;
+    text-align: left;
+    border: 1px solid var(--glass-edge);
+    border-left: 3px solid var(--ice);
+    border-radius: 18px;
+    background: var(--glass);
+    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.20);
+}
+
+.mateo-answer h2{
+    margin: 0 0 4px;
+    font-size: 1rem;
+}
+
+.mateo-answer p{
+    margin: 0;
+    color: var(--frost-dim);
+    font-size: .9rem;
+}
+
+.mateo-answer a{
+    display: inline-block;
+    margin-top: 8px;
+    color: var(--ice);
+}
+
+@keyframes mateo-breathe{
+    50%{ transform: scale(1.05); }
 }
 
 /* Phones and tablets have no "/" key, so hide the hint there */
