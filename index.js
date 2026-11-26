@@ -564,6 +564,9 @@ list.addEventListener("mouseover", function (event) {
 
 // Press "/" anywhere on the page to jump into the search box.
 document.addEventListener("keydown", function (event) {
+    // Astra is a modal room; the page behind it should not take keys.
+    if (document.body.classList.contains("astra-open")) return;
+
     const tag = document.activeElement ? document.activeElement.tagName : "";
     const alreadyTyping = tag === "INPUT" || tag === "TEXTAREA" || (document.activeElement && document.activeElement.isContentEditable);
 

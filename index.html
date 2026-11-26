@@ -16,7 +16,7 @@
             <label class="theme-control" title="Color theme">
                 <svg viewBox="0 0 24 24" aria-hidden=" true">
                     <circle cx="12" cy="12" r="3.5"/>
-                    <path d="M12 2v2m0 16v2M4.93 4.93l1.42 1.42m11.3 11.3 1.42 1.42M2 12h2m16 0h2M4.93 19.07l1.42-1.42m11.3-11.3 1.42-1.42"/>
+                    <path d="M12 2v2m0 16v2M4.93 4.93l1.42 1.42m11.3 11.3 1.42 1.42M2 12h2m16 0h2M4.93 19.07l-1.42-1.42m11.3-11.3 1.42-1.42"/>
                 </svg>
                 <select id="theme-select" aria-label="Color theme">
                     <option value="system">System</option>
@@ -26,6 +26,7 @@
             </label>
         </div>
 
+        <!-- The form still works as a normal Google search even if the JavaScript fails to load. -->
         <form class="box" id="search-form" role="search" action="https://www.google.com/search" method="get" autocomplete="off">
             <button class="search-btn" type="submit" aria-label="Search">
                 <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4.5 4.5"/></svg>
@@ -44,75 +45,199 @@
         </form>
 
         <p class="search-status" id="search-status" role="status" aria-live="polite" hidden></p>
+
+        <!-- The quick-access tiles are created by index.js. -->
         <nav class="shortcuts" id="shortcuts" aria-label="Quick links"></nav>
 
         <p class="hint">Press <kbd>/</kbd> to start searching</p>
 
-        <section class="mateo-assistant" aria-labelledby="mateo-assistant-title">
-            <button id="mateo-core" class="mateo-core" type="button"
-                    data-mateo-state="off"
-                    aria-label="Turn Mateo voice assistant on or off"></button>
-            <div class="mateo-assistant-copy">
-                <h2 id="mateo-assistant-title">Talk to Mateo</h2>
-                <p id="mateo-status" aria-live="polite">Offline. Tap the core to start.</p>
-                <p id="mateo-heard" aria-live="polite"></p>
-            </div>
-        </section>
-
-        <section id="mateo-answer" class="mateo-answer" hidden aria-live="polite"></section>
+        <button class="astra-launcher" id="astra-launcher" type="button"
+                aria-haspopup="dialog" aria-controls="astra-overlay" aria-expanded="false">
+            <span class="astra-orb" aria-hidden="true"></span>
+            <span class="astra-launcher-copy">
+                <span class="astra-launcher-name">Ask Astra</span>
+                <span class="astra-launcher-hint">Calm, calculative intelligence</span>
+            </span>
+            <span class="astra-launcher-key" aria-hidden="true">Ctrl K</span>
+        </button>
     </div>
 
-    <script>
-        window.MATEO_VOICE = {
-            searchInput: "#search-input",
-            trigger: "#mateo-core",
-            statusOnly: true,
-            answerEndpoint: "/api/answer"
-        };
-    </script>
+    <!-- Astra: the resident assistant. The modules build the conversation;
+         this shell only gives her somewhere to live. -->
+    <div class="astra-overlay" id="astra-overlay" hidden>
+        <section class="astra-panel" id="astra-panel" role="dialog" aria-modal="true" aria-labelledby="astra-title">
+            <header class="astra-head">
+                <div class="astra-brand">
+                    <span class="astra-orb astra-orb-small" aria-hidden="true"></span>
+                    <div class="astra-brand-copy">
+                        <h2 id="astra-title">Astra</h2>
+                        <p id="astra-status" data-mode="idle">Calm, calculative intelligence</p>
+                    </div>
+                </div>
+
+                <div class="astra-head-actions">
+                    <button class="astra-head-btn" id="astra-new" type="button" title="Start a new conversation">New</button>
+                    <button class="astra-head-btn astra-icon-btn" id="astra-settings-open" type="button"
+                            title="Astra settings" aria-label="Astra settings">
+                        <svg viewBox="0 0 24 24" aria-hidden="true">
+                            <circle cx="12" cy="12" r="3.2"/>
+                            <path d="M19.4 15a1.7 1.7 0 0 0 .34 1.87l.06.06-1.42 1.42-.06-.06a1.7 1.7 0 0 0-1.87-.34 1.7 1.7 0 0 0-1.03 1.56V20h-2v-.09A1.7 1.7 0 0 0 12.39 18a1.7 1.7 0 0 0-1.87.34l-.06.06-1.42-1.42.06-.06A1.7 1.7 0 0 0 9.44 15a1.7 1.7 0 0 0-1.56-1.03H7.8v-2h.08A1.7 1.7 0 0 0 9.44 10.9a1.7 1.7 0 0 0-.34-1.87L9.04 8.97l1.42-1.42.06.06A1.7 1.7 0 0 0 12.39 8a1.7 1.7 0 0 0 1.03-1.56V6.36h2v.08A1.7 1.7 0 0 0 16.45 8a1.7 1.7 0 0 0 1.87-.34l.06-.06 1.42 1.42-.06.06A1.7 1.7 0 0 0 19.4 10.9a1.7 1.7 0 0 0 1.56 1.03h.08v2h-.08A1.7 1.7 0 0 0 19.4 15Z"/>
+                        </svg>
+                    </button>
+                    <button class="astra-head-btn astra-icon-btn" id="astra-close" type="button"
+                            title="Close Astra" aria-label="Close Astra">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+                    </button>
+                </div>
+            </header>
+
+            <div class="astra-scroll" id="astra-scroll">
+                <div class="astra-thread" id="astra-thread" role="log" aria-live="polite" aria-relevant="additions"></div>
+            </div>
+
+            <form class="astra-composer" id="astra-form" autocomplete="off">
+                <button class="astra-mic" id="astra-mic" type="button" aria-label="Speak to Astra" aria-pressed="false"
+                        title="Speak to Astra">
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                        <rect x="9" y="3" width="6" height="11" rx="3"/>
+                        <path d="M5.5 11.5a6.5 6.5 0 0 0 13 0M12 18v3M9 21h6"/>
+                    </svg>
+                </button>
+
+                <textarea class="astra-input" id="astra-input" rows="1"
+                          placeholder="Ask Astra anything..." aria-label="Ask Astra"
+                          spellcheck="false"></textarea>
+
+                <button class="astra-send" id="astra-send" type="submit" aria-label="Send" title="Send">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12h15M13 6l6 6-6 6"/></svg>
+                </button>
+
+                <button class="astra-stop" id="astra-stop" type="button" aria-label="Stop reply" title="Stop" hidden>
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="7" y="7" width="10" height="10" rx="2"/></svg>
+                </button>
+            </form>
+
+            <p class="astra-footnote">
+                Astra can be wrong. Verify anything that matters.
+                <span aria-hidden="true">·</span> <kbd>Ctrl</kbd> <kbd>K</kbd> opens her anywhere.
+            </p>
+
+            <!-- Settings, kept inside the panel so the page never grows a second dialog. -->
+            <div class="astra-settings" id="astra-settings" hidden>
+                <form class="astra-settings-card" id="astra-settings-form">
+                    <header class="astra-settings-head">
+                        <div>
+                            <h3>Settings</h3>
+                            <p>Your keys and choices stay in this browser.</p>
+                        </div>
+                        <button class="astra-head-btn astra-icon-btn" id="astra-settings-close" type="button"
+                                title="Close settings" aria-label="Close settings">
+                            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+                        </button>
+                    </header>
+
+                    <div class="astra-settings-body">
+                        <section class="astra-settings-group">
+                            <h4>Intelligence</h4>
+
+                            <label class="astra-field">
+                                <span>Source</span>
+                                <select id="astra-provider">
+                                    <option value="cloud">Free cloud model — no key</option>
+                                    <option value="custom">My own OpenAI-compatible endpoint</option>
+                                </select>
+                            </label>
+
+                            <label class="astra-field" data-provider="cloud">
+                                <span>Model</span>
+                                <select id="astra-cloud-model"></select>
+                            </label>
+
+                            <label class="astra-field" data-provider="custom">
+                                <span>Endpoint</span>
+                                <input id="astra-base-url" type="url" spellcheck="false"
+                                       placeholder="https://api.openai.com/v1">
+                            </label>
+
+                            <label class="astra-field" data-provider="custom">
+                                <span>Model name</span>
+                                <input id="astra-custom-model" type="text" spellcheck="false"
+                                       placeholder="gpt-4o-mini">
+                            </label>
+
+                            <label class="astra-field" data-provider="custom">
+                                <span>API key</span>
+                                <input id="astra-api-key" type="password" autocomplete="off" spellcheck="false"
+                                       placeholder="Stored locally, never sent to Mateo">
+                            </label>
+
+                            <p class="astra-settings-note" id="astra-provider-note">
+                                The free source uses Pollinations. No account, no key, and replies may be
+                                slower at busy times.
+                            </p>
+                        </section>
+
+                        <section class="astra-settings-group">
+                            <h4>Voice and behaviour</h4>
+
+                            <label class="astra-check">
+                                <input id="astra-speak" type="checkbox">
+                                <span>Speak replies aloud</span>
+                            </label>
+
+                            <label class="astra-check">
+                                <input id="astra-show-reasoning" type="checkbox">
+                                <span>Show the live reasoning strip</span>
+                            </label>
+
+                            <label class="astra-field">
+                                <span>Voice</span>
+                                <select id="astra-voice">
+                                    <option value="">Auto — calmest available</option>
+                                </select>
+                            </label>
+
+                            <div class="astra-range-row">
+                                <label class="astra-field astra-range">
+                                    <span>Rate <output id="astra-rate-value">0.94</output></span>
+                                    <input id="astra-rate" type="range" min="0.6" max="1.3" step="0.01">
+                                </label>
+                                <label class="astra-field astra-range">
+                                    <span>Pitch <output id="astra-pitch-value">0.86</output></span>
+                                    <input id="astra-pitch" type="range" min="0.4" max="1.4" step="0.01">
+                                </label>
+                                <label class="astra-field astra-range">
+                                    <span>Volume <output id="astra-volume-value">1</output></span>
+                                    <input id="astra-volume" type="range" min="0" max="1" step="0.01">
+                                </label>
+                            </div>
+
+                            <button class="astra-ghost-btn" id="astra-test-voice" type="button">Hear this voice</button>
+                        </section>
+                    </div>
+
+                    <footer class="astra-settings-foot">
+                        <button class="astra-ghost-btn" id="astra-settings-reset" type="button">Restore defaults</button>
+                        <div class="astra-settings-actions">
+                            <button class="astra-ghost-btn" id="astra-settings-cancel" type="button">Cancel</button>
+                            <button class="astra-primary-btn" type="submit">Save</button>
+                        </div>
+                    </footer>
+                </form>
+            </div>
+        </section>
+    </div>
+
     <script src="./index.js"></script>
-    <script src="./mateo-voice.js" defer></script>
-    <script>
-        const mateoStatus = document.getElementById("mateo-status");
-        const mateoHeard = document.getElementById("mateo-heard");
-        const mateoAnswer = document.getElementById("mateo-answer");
 
-        function renderMateoAnswer(query, result) {
-            mateoAnswer.hidden = false;
-            mateoAnswer.replaceChildren();
-
-            const heading = document.createElement("h2");
-            heading.textContent = query;
-            const text = document.createElement("p");
-            text.textContent = result.text || result.answer || "";
-            mateoAnswer.append(heading, text);
-
-            if (result.url) {
-                const source = document.createElement("a");
-                source.href = result.url;
-                source.target = "_blank";
-                source.rel = "noopener";
-                source.textContent = "Read the source";
-                mateoAnswer.append(source);
-            }
-        }
-
-        document.addEventListener("mateo:state", function (event) {
-            mateoStatus.textContent = event.detail.label;
-            if (event.detail.state === "sleeping") mateoHeard.textContent = "";
-        });
-        document.addEventListener("mateo:notice", function (event) {
-            mateoStatus.textContent = event.detail;
-        });
-        document.addEventListener("mateo:heard", function (event) {
-            mateoHeard.textContent = event.detail ? "“" + event.detail + "”" : "";
-        });
-        document.addEventListener("mateo:query", function (event) {
-            mateoHeard.textContent = "“" + event.detail.query + "”";
-        });
-        document.addEventListener("mateo:answer", function (event) {
-            renderMateoAnswer(event.detail.query, event.detail);
-        });
-    </script>
+    <!-- Astra's parts. Load order matters: each file adds one piece to window.Mateo. -->
+    <script src="./assistant/store.js"></script>
+    <script src="./assistant/markdown.js"></script>
+    <script src="./assistant/persona.js"></script>
+    <script src="./assistant/local.js"></script>
+    <script src="./assistant/brain.js"></script>
+    <script src="./assistant/speech.js"></script>
+    <script src="./assistant/messages.js"></script>
+    <script src="./assistant/astra.js"></script>
 </body>
 </html>

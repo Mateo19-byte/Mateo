@@ -664,3 +664,1112 @@ kbd{
         transition: none !important;
     }
 }
+
+
+/* =========================================================
+   ASTRA  -  the assistant shell
+   The modules in /assistant build the conversation. These
+   rules only decide how the room looks.
+   ========================================================= */
+
+:root{
+    --astra-panel: linear-gradient(165deg, rgba(20, 36, 70, 0.98), rgba(9, 17, 38, 0.99));
+    --astra-card: rgba(255, 255, 255, 0.055);
+    --astra-edge: rgba(255, 255, 255, 0.12);
+    --astra-input: rgba(255, 255, 255, 0.06);
+    --astra-code: rgba(0, 0, 0, 0.24);
+    --astra-overlay: rgba(3, 8, 20, 0.66);
+    --astra-shadow: 0 30px 80px rgba(0, 0, 0, 0.55);
+}
+
+body[data-resolved-theme="day"]{
+    --astra-panel: linear-gradient(165deg, #fbfdff, #e8f5ff);
+    --astra-card: rgba(255, 255, 255, 0.74);
+    --astra-edge: rgba(35, 80, 130, 0.14);
+    --astra-input: rgba(255, 255, 255, 0.72);
+    --astra-code: rgba(14, 40, 70, 0.06);
+    --astra-overlay: rgba(160, 200, 240, 0.45);
+    --astra-shadow: 0 30px 80px rgba(22, 64, 112, 0.22);
+}
+
+body.astra-open{
+    overflow: hidden;
+}
+
+
+/* ---------- The small invitation under the quick links ---------- */
+.astra-launcher{
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    width: 100%;
+    max-width: 440px;
+    margin: 26px auto 0;
+    padding: 11px 15px;
+    text-align: left;
+    color: var(--frost);
+    background: var(--glass);
+    border: 1px solid var(--glass-edge);
+    border-radius: 20px;
+    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.20);
+    -webkit-backdrop-filter: blur(14px);
+    backdrop-filter: blur(14px);
+    cursor: pointer;
+    transition: transform 0.2s, border-color 0.2s, background 0.2s, box-shadow 0.2s;
+    animation: thaw 1.1s 0.65s ease-out backwards;
+}
+
+.astra-launcher:hover{
+    transform: translateY(-2px);
+    border-color: var(--ice);
+    background: var(--glass-hover);
+    box-shadow: 0 14px 30px rgba(0, 0, 0, 0.26), 0 0 0 4px var(--ice-soft);
+}
+
+.astra-launcher-copy{
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    min-width: 0;
+}
+
+.astra-launcher-name{
+    font-size: 0.94rem;
+    font-weight: 600;
+}
+
+.astra-launcher-hint{
+    overflow: hidden;
+    color: var(--frost-dim);
+    font-size: 0.74rem;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.astra-launcher-key{
+    flex: none;
+    margin-left: auto;
+    padding: 3px 7px;
+    border: 1px solid var(--glass-edge);
+    border-radius: 7px;
+    color: var(--frost-dim);
+    font-size: 0.68rem;
+    letter-spacing: 0.03em;
+    white-space: nowrap;
+}
+
+/* ---------- The orb ---------- */
+.astra-orb{
+    position: relative;
+    flex: none;
+    width: 38px;
+    height: 38px;
+    border: 1px solid rgba(191, 227, 255, 0.72);
+    border-radius: 50%;
+    background:
+        radial-gradient(circle at 34% 28%, #ffffff 0 5%, #d9f0ff 6% 15%, #8fc7ff 16% 32%, #31558c 33% 58%, #0b1430 59%);
+    box-shadow:
+        0 0 18px rgba(191, 227, 255, 0.32),
+        inset 0 0 12px rgba(255, 255, 255, 0.34);
+}
+
+.astra-orb::before{
+    position: absolute;
+    inset: -5px;
+    border: 1px solid rgba(191, 227, 255, 0.18);
+    border-top-color: rgba(191, 227, 255, 0.78);
+    border-radius: 50%;
+    content: "";
+    animation: astra-orbit 7s linear infinite;
+}
+
+.astra-orb::after{
+    position: absolute;
+    inset: 20%;
+    border-radius: 50%;
+    background: radial-gradient(circle at 36% 30%, rgba(255, 255, 255, 0.92), transparent 58%);
+    content: "";
+    opacity: 0.72;
+}
+
+.astra-orb-small{
+    width: 32px;
+    height: 32px;
+}
+
+
+/* ---------- The overlay and panel ---------- */
+.astra-overlay{
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    display: grid;
+    place-items: center;
+    padding: 18px;
+    background: var(--astra-overlay);
+    -webkit-backdrop-filter: blur(9px);
+    backdrop-filter: blur(9px);
+    animation: astra-fade 0.22s ease-out;
+}
+
+.astra-overlay[hidden]{
+    display: none;
+}
+
+.astra-panel{
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    width: min(780px, 100%);
+    height: min(820px, 88vh);
+    height: min(820px, 88dvh);
+    overflow: hidden;
+    color: var(--frost);
+    text-align: left;
+    background: var(--astra-panel);
+    border: 1px solid var(--glass-edge);
+    border-radius: 28px;
+    box-shadow: var(--astra-shadow);
+    animation: astra-rise 0.28s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.astra-head{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex: none;
+    padding: 15px 18px;
+    border-bottom: 1px solid var(--astra-edge);
+    background: rgba(255, 255, 255, 0.025);
+}
+
+body[data-resolved-theme="day"] .astra-head{
+    background: rgba(255, 255, 255, 0.45);
+}
+
+.astra-brand{
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 0;
+}
+
+.astra-brand-copy{
+    min-width: 0;
+}
+
+.astra-brand-copy h2{
+    font-family: "Iowan Old Style", "Baskerville", "Palatino Linotype", Palatino, Georgia, serif;
+    font-size: 1.24rem;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    line-height: 1.1;
+}
+
+.astra-brand-copy p{
+    margin-top: 3px;
+    overflow: hidden;
+    color: var(--frost-dim);
+    font-size: 0.72rem;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    transition: color 0.2s;
+}
+
+.astra-brand-copy p[data-mode="thinking"]{ color: #c7b8ff; }
+.astra-brand-copy p[data-mode="speaking"]{ color: #7fffd4; }
+.astra-brand-copy p[data-mode="listening"]{ color: var(--ice); }
+.astra-brand-copy p[data-mode="offline"]{ color: #ffb4a8; }
+
+.astra-head-actions{
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    flex: none;
+}
+
+.astra-head-btn{
+    display: inline-grid;
+    place-items: center;
+    min-width: 34px;
+    height: 34px;
+    padding: 0 11px;
+    border: 1px solid transparent;
+    border-radius: 10px;
+    background: transparent;
+    color: var(--frost-dim);
+    font: inherit;
+    font-size: 0.78rem;
+    cursor: pointer;
+    transition: color 0.2s, background 0.2s, border-color 0.2s;
+}
+
+.astra-head-btn:hover{
+    color: var(--frost);
+    background: var(--ice-soft);
+    border-color: rgba(191, 227, 255, 0.22);
+}
+
+.astra-icon-btn{
+    padding: 0;
+}
+
+.astra-icon-btn svg{
+    width: 17px;
+    height: 17px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.7;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.astra-scroll{
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding: 22px 20px 8px;
+    scrollbar-color: rgba(191, 227, 255, 0.28) transparent;
+    scrollbar-width: thin;
+}
+
+.astra-scroll::-webkit-scrollbar{
+    width: 10px;
+}
+
+.astra-scroll::-webkit-scrollbar-thumb{
+    border: 3px solid transparent;
+    border-radius: 10px;
+    background: rgba(191, 227, 255, 0.25);
+    background-clip: content-box;
+}
+
+.astra-thread{
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    width: min(660px, 100%);
+    margin: 0 auto;
+}
+
+
+/* ---------- A fresh conversation ---------- */
+.astra-intro{
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 8px 4px 4px;
+}
+
+.astra-intro > .astra-orb{
+    width: 52px;
+    height: 52px;
+    margin-bottom: 2px;
+}
+
+.astra-intro h3{
+    font-family: "Iowan Old Style", "Baskerville", "Palatino Linotype", Palatino, Georgia, serif;
+    font-size: clamp(1.55rem, 4vw, 1.95rem);
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    line-height: 1.1;
+}
+
+.astra-intro > p{
+    max-width: 58ch;
+    color: var(--frost-dim);
+    font-size: 0.93rem;
+    line-height: 1.65;
+}
+
+.astra-starters{
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    width: 100%;
+    margin-top: 4px;
+}
+
+.astra-starter{
+    padding: 11px 13px;
+    text-align: left;
+    color: var(--frost);
+    background: var(--astra-card);
+    border: 1px solid var(--astra-edge);
+    border-radius: 13px;
+    font: inherit;
+    font-size: 0.82rem;
+    line-height: 1.4;
+    cursor: pointer;
+    transition: transform 0.2s, border-color 0.2s, background 0.2s;
+}
+
+.astra-starter:hover{
+    transform: translateY(-1px);
+    border-color: rgba(191, 227, 255, 0.38);
+    background: var(--ice-soft);
+}
+
+
+/* ---------- Turns ---------- */
+.astra-turn{
+    display: flex;
+    width: 100%;
+}
+
+.astra-turn-user{
+    justify-content: flex-end;
+}
+
+.astra-bubble{
+    max-width: 86%;
+    padding: 11px 15px;
+    border: 1px solid rgba(191, 227, 255, 0.22);
+    border-radius: 18px 18px 6px 18px;
+    background: var(--ice-soft);
+    color: var(--frost);
+    font-size: 0.93rem;
+    line-height: 1.55;
+    overflow-wrap: anywhere;
+    white-space: pre-wrap;
+}
+
+body[data-resolved-theme="day"] .astra-bubble{
+    background: rgba(45, 127, 249, 0.10);
+}
+
+.astra-turn-astra{
+    justify-content: flex-start;
+}
+
+.astra-card{
+    width: 100%;
+    padding: 14px 16px;
+    border: 1px solid var(--astra-edge);
+    border-left: 2px solid rgba(191, 227, 255, 0.34);
+    border-radius: 18px 18px 18px 6px;
+    background: var(--astra-card);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.10);
+    overflow-wrap: anywhere;
+}
+
+body[data-resolved-theme="day"] .astra-card{
+    box-shadow: 0 8px 24px rgba(22, 64, 112, 0.06);
+}
+
+.astra-body{
+    font-size: 0.94rem;
+    line-height: 1.62;
+}
+
+.astra-body.is-streaming::after{
+    display: inline-block;
+    width: 7px;
+    height: 1.05em;
+    margin-left: 2px;
+    vertical-align: -0.15em;
+    border-radius: 2px;
+    background: var(--ice);
+    content: "";
+    animation: astra-caret 0.9s steps(2, start) infinite;
+}
+
+.astra-body p + p,
+.astra-body p + ul,
+.astra-body p + ol,
+.astra-body p + .astra-code{
+    margin-top: 0.7em;
+}
+
+.astra-body strong{
+    font-weight: 600;
+}
+
+.astra-body em{
+    color: var(--frost-dim);
+}
+
+.astra-heading{
+    margin: 0.85em 0 0.35em;
+    font-family: "Iowan Old Style", "Baskerville", "Palatino Linotype", Palatino, Georgia, serif;
+    font-weight: 600;
+    line-height: 1.25;
+}
+
+.astra-heading:first-child{
+    margin-top: 0;
+}
+
+h3.astra-heading{ font-size: 1.18rem; }
+h4.astra-heading{ font-size: 1.06rem; }
+h5.astra-heading,
+h6.astra-heading{ font-size: 0.98rem; }
+
+.astra-list{
+    margin: 0.5em 0;
+    padding-left: 1.35em;
+}
+
+.astra-list li + li{
+    margin-top: 0.22em;
+}
+
+.astra-quote{
+    margin: 0.7em 0;
+    padding: 0.1em 0 0.1em 0.9em;
+    border-left: 2px solid rgba(191, 227, 255, 0.34);
+    color: var(--frost-dim);
+}
+
+.astra-inline-code{
+    padding: 0.12em 0.38em;
+    border: 1px solid var(--astra-edge);
+    border-radius: 5px;
+    background: var(--astra-code);
+    font-family: "Cascadia Code", Consolas, "SFMono-Regular", Menlo, monospace;
+    font-size: 0.86em;
+}
+
+.astra-code{
+    margin: 0.8em 0;
+    overflow: hidden;
+    border: 1px solid var(--astra-edge);
+    border-radius: 12px;
+    background: var(--astra-code);
+}
+
+.astra-code-bar{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 7px 12px;
+    border-bottom: 1px solid var(--astra-edge);
+    color: var(--frost-dim);
+    font-size: 0.7rem;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+}
+
+.astra-copy{
+    padding: 3px 7px;
+    border: 1px solid transparent;
+    border-radius: 6px;
+    background: transparent;
+    color: var(--frost-dim);
+    font: inherit;
+    font-size: 0.7rem;
+    cursor: pointer;
+}
+
+.astra-copy:hover{
+    color: var(--frost);
+    border-color: var(--astra-edge);
+    background: var(--ice-soft);
+}
+
+.astra-code pre{
+    margin: 0;
+    padding: 12px 14px;
+    overflow-x: auto;
+    font-family: "Cascadia Code", Consolas, "SFMono-Regular", Menlo, monospace;
+    font-size: 0.8rem;
+    line-height: 1.55;
+}
+
+.astra-code code{
+    font: inherit;
+}
+
+
+/* ---------- Reasoning, notes, hand-off ---------- */
+.astra-reasoning{
+    margin: -2px 0 10px;
+    padding: 8px 10px;
+    border: 1px dashed var(--astra-edge);
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.025);
+    color: var(--frost-dim);
+    font-size: 0.76rem;
+}
+
+body[data-resolved-theme="day"] .astra-reasoning{
+    background: rgba(255, 255, 255, 0.42);
+}
+
+.astra-reasoning summary{
+    color: var(--frost-dim);
+    font-size: 0.69rem;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    cursor: pointer;
+    user-select: none;
+}
+
+.astra-reasoning.is-live summary::after{
+    content: " …";
+}
+
+.astra-reasoning-text{
+    max-height: 150px;
+    margin-top: 7px;
+    overflow-y: auto;
+    font-family: "Cascadia Code", Consolas, "SFMono-Regular", Menlo, monospace;
+    font-size: 0.72rem;
+    line-height: 1.5;
+    white-space: pre-wrap;
+}
+
+.astra-note{
+    margin-top: 9px;
+    color: var(--frost-dim);
+    font-size: 0.73rem;
+    font-style: italic;
+}
+
+.astra-search-chip{
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    max-width: 100%;
+    margin-top: 11px;
+    padding: 8px 12px;
+    text-align: left;
+    color: var(--frost);
+    background: var(--ice-soft);
+    border: 1px solid rgba(191, 227, 255, 0.34);
+    border-radius: 999px;
+    font: inherit;
+    font-size: 0.8rem;
+    line-height: 1.35;
+    cursor: pointer;
+    transition: background 0.2s, border-color 0.2s;
+}
+
+.astra-search-chip::before{
+    content: "↗";
+    flex: none;
+    color: var(--ice);
+}
+
+.astra-search-chip:hover{
+    background: rgba(191, 227, 255, 0.28);
+    border-color: var(--ice);
+}
+
+.astra-failure{
+    margin-top: 10px;
+    padding: 10px 12px;
+    border: 1px solid rgba(255, 140, 140, 0.30);
+    border-radius: 12px;
+    background: rgba(255, 90, 90, 0.08);
+}
+
+.astra-failure-title{
+    color: #ffd0cc;
+    font-size: 0.85rem;
+    line-height: 1.5;
+}
+
+body[data-resolved-theme="day"] .astra-failure-title{
+    color: #8b1e1e;
+}
+
+.astra-failure-actions{
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 8px;
+}
+
+.astra-mini{
+    padding: 5px 9px;
+    border: 1px solid var(--astra-edge);
+    border-radius: 7px;
+    background: transparent;
+    color: var(--frost);
+    font: inherit;
+    font-size: 0.75rem;
+    cursor: pointer;
+}
+
+.astra-mini:hover{
+    border-color: var(--ice);
+    background: var(--ice-soft);
+}
+
+
+/* ---------- Composer ---------- */
+.astra-composer{
+    display: flex;
+    align-items: flex-end;
+    gap: 8px;
+    flex: none;
+    padding: 12px 16px 6px;
+    border-top: 1px solid var(--astra-edge);
+    background: rgba(0, 0, 0, 0.08);
+}
+
+body[data-resolved-theme="day"] .astra-composer{
+    background: rgba(255, 255, 255, 0.42);
+}
+
+.astra-input{
+    flex: 1;
+    min-height: 44px;
+    max-height: 160px;
+    padding: 11px 14px;
+    resize: none;
+    border: 1px solid var(--glass-edge);
+    border-radius: 16px;
+    background: var(--astra-input);
+    color: var(--frost);
+    font: inherit;
+    font-size: 0.94rem;
+    line-height: 1.45;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.astra-input::placeholder{
+    color: var(--frost-dim);
+}
+
+.astra-input:focus{
+    border-color: var(--ice);
+    box-shadow: 0 0 0 3px var(--ice-soft);
+}
+
+.astra-mic,
+.astra-send,
+.astra-stop{
+    display: grid;
+    place-items: center;
+    flex: none;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s, border-color 0.2s, transform 0.2s;
+}
+
+.astra-mic{
+    border: 1px solid var(--glass-edge);
+    background: transparent;
+    color: var(--frost-dim);
+}
+
+.astra-mic:hover{
+    color: var(--frost);
+    border-color: var(--ice);
+    background: var(--ice-soft);
+}
+
+.astra-mic[aria-pressed="true"]{
+    color: var(--ice);
+    border-color: var(--ice);
+    background: var(--ice-soft);
+    animation: astra-pulse 1.4s ease-in-out infinite;
+}
+
+.astra-send{
+    border: 1px solid transparent;
+    background: var(--ice);
+    color: #0b1430;
+}
+
+.astra-send:hover{
+    transform: translateY(-1px);
+    filter: brightness(1.08);
+}
+
+.astra-stop{
+    border: 1px solid rgba(255, 120, 120, 0.35);
+    background: rgba(255, 120, 120, 0.16);
+    color: #ffb4a8;
+}
+
+.astra-stop:hover{
+    background: rgba(255, 120, 120, 0.26);
+}
+
+.astra-send[hidden],
+.astra-stop[hidden],
+.astra-mic[hidden]{
+    display: none;
+}
+
+.astra-mic svg,
+.astra-send svg,
+.astra-stop svg{
+    width: 19px;
+    height: 19px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.9;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.astra-footnote{
+    flex: none;
+    margin: 0;
+    padding: 2px 16px 13px;
+    color: var(--frost-dim);
+    font-size: 0.68rem;
+    line-height: 1.5;
+}
+
+.astra-footnote kbd{
+    padding: 0 4px;
+    border-color: var(--astra-edge);
+    font-size: 0.65rem;
+}
+
+
+/* ---------- Settings ---------- */
+.astra-settings{
+    position: absolute;
+    inset: 0;
+    z-index: 5;
+    display: grid;
+    place-items: center;
+    padding: 16px;
+    background: var(--astra-overlay);
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
+    animation: astra-fade 0.18s ease-out;
+}
+
+.astra-settings[hidden]{
+    display: none;
+}
+
+.astra-settings-card{
+    display: flex;
+    flex-direction: column;
+    width: min(600px, 100%);
+    max-height: 100%;
+    overflow: hidden;
+    color: var(--frost);
+    background: var(--astra-panel);
+    border: 1px solid var(--glass-edge);
+    border-radius: 22px;
+    box-shadow: var(--astra-shadow);
+    animation: astra-rise 0.22s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.astra-settings-head{
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    flex: none;
+    padding: 17px 20px;
+    border-bottom: 1px solid var(--astra-edge);
+}
+
+.astra-settings-head h3{
+    font-family: "Iowan Old Style", "Baskerville", "Palatino Linotype", Palatino, Georgia, serif;
+    font-size: 1.2rem;
+    font-weight: 600;
+}
+
+.astra-settings-head p{
+    margin-top: 3px;
+    color: var(--frost-dim);
+    font-size: 0.74rem;
+}
+
+.astra-settings-body{
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    overflow-y: auto;
+    padding: 18px 20px;
+    scrollbar-color: rgba(191, 227, 255, 0.28) transparent;
+    scrollbar-width: thin;
+}
+
+.astra-settings-group h4{
+    color: var(--frost);
+    font-size: 0.78rem;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+}
+
+.astra-field{
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-top: 10px;
+    color: var(--frost-dim);
+    font-size: 0.8rem;
+}
+
+.astra-field[data-provider]{
+    display: none;
+}
+
+.astra-field[data-provider].is-visible{
+    display: flex;
+}
+
+.astra-field > span{
+    font-size: 0.72rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.astra-field input,
+.astra-field select{
+    width: 100%;
+    height: 40px;
+    padding: 0 12px;
+    border: 1px solid var(--glass-edge);
+    border-radius: 10px;
+    background: var(--astra-input);
+    color: var(--frost);
+    font: inherit;
+    font-size: 0.9rem;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.astra-field input:focus,
+.astra-field select:focus{
+    border-color: var(--ice);
+    box-shadow: 0 0 0 3px var(--ice-soft);
+}
+
+.astra-field select option{
+    background: var(--panel);
+    color: var(--frost);
+}
+
+.astra-settings-note{
+    margin-top: 10px;
+    color: var(--frost-dim);
+    font-size: 0.74rem;
+    line-height: 1.55;
+}
+
+.astra-check{
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 10px;
+    color: var(--frost);
+    font-size: 0.86rem;
+    cursor: pointer;
+}
+
+.astra-check input{
+    width: 16px;
+    height: 16px;
+    flex: none;
+    accent-color: var(--ice);
+}
+
+.astra-range-row{
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.astra-range{
+    margin-top: 0;
+}
+
+.astra-range > span{
+    display: flex;
+    justify-content: space-between;
+    gap: 6px;
+}
+
+.astra-range output{
+    color: var(--frost);
+    font-variant-numeric: tabular-nums;
+    text-transform: none;
+}
+
+.astra-range input[type="range"]{
+    height: auto;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    accent-color: var(--ice);
+}
+
+.astra-ghost-btn,
+.astra-primary-btn{
+    display: inline-grid;
+    place-items: center;
+    min-height: 38px;
+    padding: 0 14px;
+    border-radius: 10px;
+    font: inherit;
+    font-size: 0.82rem;
+    cursor: pointer;
+    transition: background 0.2s, border-color 0.2s, color 0.2s;
+}
+
+.astra-ghost-btn{
+    border: 1px solid var(--glass-edge);
+    background: transparent;
+    color: var(--frost-dim);
+}
+
+.astra-ghost-btn:hover{
+    color: var(--frost);
+    border-color: var(--ice);
+    background: var(--ice-soft);
+}
+
+.astra-primary-btn{
+    border: 1px solid transparent;
+    background: var(--ice);
+    color: #0b1430;
+    font-weight: 600;
+}
+
+.astra-primary-btn:hover{
+    filter: brightness(1.08);
+}
+
+#astra-test-voice{
+    margin-top: 12px;
+}
+
+.astra-settings-foot{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+    flex: none;
+    padding: 13px 20px;
+    border-top: 1px solid var(--astra-edge);
+}
+
+.astra-settings-actions{
+    display: flex;
+    gap: 8px;
+}
+
+
+/* ---------- Focus ---------- */
+.astra-launcher:focus-visible,
+.astra-head-btn:focus-visible,
+.astra-starter:focus-visible,
+.astra-search-chip:focus-visible,
+.astra-mini:focus-visible,
+.astra-mic:focus-visible,
+.astra-send:focus-visible,
+.astra-stop:focus-visible,
+.astra-copy:focus-visible,
+.astra-ghost-btn:focus-visible,
+.astra-primary-btn:focus-visible{
+    outline: 2px solid var(--ice);
+    outline-offset: 2px;
+}
+
+
+/* ---------- Motion ---------- */
+@keyframes astra-fade{
+    from{ opacity: 0; }
+    to  { opacity: 1; }
+}
+
+@keyframes astra-rise{
+    from{ opacity: 0; transform: translateY(14px) scale(0.985); }
+    to  { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes astra-orbit{
+    to{ transform: rotate(360deg); }
+}
+
+@keyframes astra-caret{
+    50%{ opacity: 0; }
+}
+
+@keyframes astra-pulse{
+    50%{ box-shadow: 0 0 0 7px var(--ice-soft); }
+}
+
+
+/* ---------- Phones ---------- */
+@media (max-width: 720px){
+    .astra-overlay{
+        padding: 0;
+    }
+
+    .astra-panel{
+        width: 100%;
+        height: 100vh;
+        height: 100dvh;
+        border: 0;
+        border-radius: 0;
+    }
+
+    .astra-head{
+        padding: 13px 14px;
+    }
+
+    .astra-scroll{
+        padding: 18px 14px 6px;
+    }
+
+    .astra-starters{
+        grid-template-columns: 1fr;
+    }
+
+    .astra-composer{
+        padding: 10px 12px 4px;
+    }
+
+    .astra-footnote{
+        padding: 2px 14px 11px;
+    }
+
+    .astra-settings{
+        padding: 0;
+    }
+
+    .astra-settings-card{
+        width: 100%;
+        height: 100%;
+        max-height: none;
+        border: 0;
+        border-radius: 0;
+    }
+
+    .astra-range-row{
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 420px){
+    .astra-launcher-key{
+        display: none;
+    }
+
+    .astra-head-actions{
+        gap: 2px;
+    }
+
+    .astra-head-btn{
+        min-width: 32px;
+        padding: 0 8px;
+    }
+
+    .astra-brand-copy p{
+        max-width: 150px;
+    }
+}
